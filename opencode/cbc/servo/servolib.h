@@ -3,9 +3,8 @@
 #define SERVO_COUNT 4
 #define SERVO_MINPOS 0
 #define SERVO_MAXPOS 2048
-#define SERVO_DEGREE -2
-#define SERVO_MINDEG 0.0
-#define SERVO_MAXDEG 180.0
+#define SERVO_TYPE_POSITION 'P'
+#define SERVO_TYPE_ANGLE 'D'
 #include <pthread.h>
 #include "../sensor/sensorlib.h"
 static pthread_mutex_t init_mem = PTHREAD_MUTEX_INITIALIZER;
@@ -23,6 +22,7 @@ struct servo_movement_properties
 	struct servo_position_properties{
 		int position, tpm;
 	}*servo_position;
+	char type;
 	long latency;
 };
 typedef struct servo_movement_properties *servo_movement;
@@ -51,16 +51,18 @@ servo_movement build_servo_position(int position, int tpm, long latency){
 	new_position->servo_position->position = position;
 	new_position->servo_position->tpm = tpm;
 	new_position->latency = latency;
+	new_position->type = SERVO_TYPE_POSITION;
 	return(new_position);
 }
 servo_movement build_servo_angle(float angle, float dpm, long latency){
 	servo_movement new_position = malloc(sizeof(struct servo_movement_properties));
 	new_position->servo_position = malloc(sizeof(struct servo_position_properties));
 	new_position->servo_angle = malloc(sizeof(struct servo_angle_properties));
-	new_position->servo_position->position = SERVO_DEGREE;
+	new_position->servo_position->position = -1;
 	new_position->servo_angle->angle = angle;
 	new_position->servo_angle->dpm = dpm;
 	new_position->latency = latency;
+	new_position->type = SERVO_TYPE_POSITION;
 	return(new_position);
 }
 
@@ -99,11 +101,11 @@ void move_servo(servo this_servo, servo_movement move_properties){
 	if(move_properties->servo_position->position >= SERVO_MINPOS && move_properties->servo_position->position <= SERVO_MAXPOS){
 		this_servo->next_position = move_properties;
 	}
-	else if(move_properties->servo_position->position == SERVO_DEGREE){
+	else if(move_properties->type == SERVO_TYPE_ANGLE){
 		move_properties->servo_position->position = this_servo->min + (int)((move_properties->servo_angle->angle - this_servo->min_d) / (this_servo->max_d - this_servo->min_d) * (float)(this_servo->max - this_servo->min));
 		move_properties->servo_position->tpm = (int)(move_properties->servo_angle->dpm * ((float)(this_servo->max - this_servo->min) / (this_servo->max_d - this_servo->min_d)));
-	pthread_create(&this_servo->thread_id, NULL, &control_servo, (void *)this_servo);
 	}
+	pthread_create(&this_servo->thread_id, NULL, &control_servo, (void *)this_servo);
 }
 void wait_servo(servo this_servo, servo_movement move_properties){
 	this_servo->next_position = move_properties;
