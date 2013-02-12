@@ -1,9 +1,7 @@
 #ifndef __MOTORLIB_H__
 #define __MOTORLIB_H__
-#ifdef XCODE
-#include "../config/cbcconfig.h"
-#endif
-#include "/usr/include/pthread.h"
+
+#include <pthread.h>
 #include "../sensor/sensorlib.h"
 #include "/usr/include/kovan/kovan.h"
 struct motor_attributes{
@@ -45,6 +43,7 @@ void wait_motor(dcmotor this_motor, dcmotor_position position){
 	bmd(this_motor->port);
 }
 
+void
 void kill_motor(dcmotor this_motor){
 	off(this_motor->port);
 }
