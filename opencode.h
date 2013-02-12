@@ -1,5 +1,8 @@
 #ifndef __OPENCODE_H__
 #define __OPENCODE_H__
+#ifndef __arm__
+#include "../config/cbcconfig.h"
+#endif
 #include "opencode/cbc/drive/drivelib.h"
 #include "opencode/cbc/light/lightstart.h"
 #include "opencode/cbc/map/maplib.h"
