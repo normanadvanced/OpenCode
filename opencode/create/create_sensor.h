@@ -1,7 +1,82 @@
 #ifndef __CREATE_SENSOR_H__
 #define __CREATE_SENSOR_H__
 
-#include "create_config.h"
+#include "./create_config.h"
+
+// structures used to track and cache Create data
+struct _sensor_packet{
+    float lastUpdate; //cpu clock time
+    unsigned int data; // 4 bytes or less of data
+};
+
+struct create_side{
+	struct create_wheel_properties{
+		int last_requested_speed;
+		float sprop;
+	}wheel;
+	struct cliffs_of_dover{
+		int port, black, white, error;
+		long timeout;
+	}cliff;
+	struct bump_me{
+		long timeout;
+	}bump;
+}create_left, create_right;
+
+struct _create_state{
+    int createConnected;
+    int createBusy;
+    int normalizedAngle;
+    int totalAngle;
+    int accumulatedDistance;//sum of the increment distances
+    int driveDirect;//1 if active command of each wheel
+    int drive;//1 if speed and radius command is active
+    int lspeed;//command last sent
+    int rspeed;
+    int radius;
+    int speed;
+    int leds[3];//The state of the create LEDs
+    struct _sensor_packet bumpsWheelDrops;//packet 7, b4 caster, b3 lw, b2 rw, b1 lb, b0 rb
+    struct _sensor_packet wall;//packet 8, 0 no wall, 1 wall
+    struct _sensor_packet lcliff;//packet 9 left cliff sensor 0 no cliff, 1 cliff
+    struct _sensor_packet lfcliff;//packet 10 left front cliff sensor 0 no cliff, 1 cliff
+    struct _sensor_packet rfcliff;//packet 11 right front cliff sensor 0 no cliff, 1 cliff
+    struct _sensor_packet rcliff;//packet 12 right cliff sensor 0 no cliff, 1 cliff
+    struct _sensor_packet vWall;//packet 13 0 no wall seen, 1 there is a wall
+    struct _sensor_packet LSDandWheelOvercurrents ;//packet 14;b4 LW, b3 RW, B2 LD2, b1 LD0, b0 LD1
+    // packets 15-16 are unused
+    struct _sensor_packet infrared;//packet 17; byte received from IR remote. 255 means no byte seen
+    struct _sensor_packet buttons;//packet 18; b2 advance button is pressed, b0 play button
+    struct _sensor_packet distance; //packet 19; 2 byte signed number in mm since last request
+    struct _sensor_packet angle;//packet 20; in degrees since last request - 2 byte signed num
+    struct _sensor_packet chargingState;//packet 21; 0=not charging; 1-reconditioning chargeing; 2 full charging; 3 trickle charging; 4 waiting; 5 charge fault
+    struct _sensor_packet voltage;//packet 22; unsigned 2 byte in mV
+    struct _sensor_packet current;// packet 23; signed 2 byte in mA
+    struct _sensor_packet batteryTemp;//packet 24; temp in degrees Celcius (1 byte signed)
+    struct _sensor_packet batteryCharge;//packet 25; 2byte no sign in mAh
+    struct _sensor_packet batteryCapacity;//packet 26; estimated charge capacity of battery in mAh
+    struct _sensor_packet wallSignal;//packet 27; analog value of wall sensor 0-4095
+    struct _sensor_packet lcliffSignal;//packet 28 left cliff sensor 0-4095
+    struct _sensor_packet lfcliffSignal;//packet 29 left front cliff sensor 0-4095
+    struct _sensor_packet rfcliffSignal;//packet 30 right front cliff sensor 0-4095
+    struct _sensor_packet rcliffSignal;//packet 31 right cliff sensor 0-4095
+    struct _sensor_packet cargoBayDI;//packet 32; b4 baud rate change pin 15, b3 DI3 pin 6, b2 DI2-pin 18, b1 DI1 pin 5, b0 DI0 pin 17
+    struct _sensor_packet cargoBayAI;//packet 33; 0-1024
+    struct _sensor_packet chargingSource;//packet 34; b1 home base, b0 internal charger
+    struct _sensor_packet OIMode;//packet 35;0=off,1=passive,2=safe,3=full
+    struct _sensor_packet songNumber;//packet 36; currently selected song number
+    struct _sensor_packet songPlaying;//packet 37;1=song is playing, 0 song not playing
+    struct _sensor_packet numStreamPackets;//packet-38, number of streamed packets, 0-43, is returned
+    struct _sensor_packet requestedVelocity;//packet 39; -500 to 500
+    struct _sensor_packet requestedRadius;//packet 40; -32768 to 32767
+    struct _sensor_packet requestedRVelocity;//packet 41; -500 to 500
+    struct _sensor_packet requestedLVelocity;//packet 42; left wheel v -500 to 500
+} ;
+
+// This global is used by the user to store songs to be played on the Create
+// The functions create_load_song and create_play_song are used to get the data
+// from this global to the Create.  The user fills the global on their own.
+extern int gc_song_array[16][33];
 
 #define EVENT_WHEEL_DROP 1
 #define EVENT_FRONT_WHEEL_DROP 2
@@ -98,21 +173,24 @@ void create_drive_touch(int rspeed, int lspeed, int rport, int lport)
 void create_sync()
 {
 	char buffer[1];
-	char *bptr = buffer;
-	
+    char *bptr = buffer;
+
 	int read_count = 0;
-	int count = 1;
-	
-	CREATE_BUSY;
-	serial_write_byte(142);
-	serial_write_byte(35);
-	
-	while(read_count < count)
+    int count = 1;
+
+    //CREATE_BUSY;
+    serial_write_byte(142);
+    serial_write_byte(35);
+
+    while(read_count == 0)
 	{
 		#ifdef __arm__
-		read_count += serial_read(buffer+read_count, count-read_count);
+        read_count += create_read_block(buffer+read_count, count-read_count);
+        printf("%d", create_read_block(buffer+read_count, count-read_count));
+        msleep(1000);
 		#endif
 	}
-	CREATE_FREE;
+
+	//CREATE_FREE;
 }
 #endif

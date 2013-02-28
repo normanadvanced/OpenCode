@@ -13,12 +13,12 @@ struct thread_properties
     int ID;
     int is_running;
     int return_val;
-    *void func;
+    void* func;
 };
 
-typedef struct thread_properties *thread;
+typedef struct thread_properties *k_thread;
 
-thread build_thread(void func)
+k_thread build_thread(void func)
 {
     thread t_thread = malloc(sizeof(struct thread_properties));
 
@@ -31,7 +31,7 @@ thread build_thread(void func)
 
 
 //starts a thread
-void start_thread(thread t)
+void start_thread(k_thread t)
 {
     pthread_mutex_lock(&thread_mem);
     if((t->ID = pthread_create(&t->this_thread, NULL, &t->func, (void *)0)))
@@ -41,18 +41,18 @@ void start_thread(thread t)
 	else
 	{
 	    t->is_running=1;
-		t->ID = t->this_thread;
+		t->ID = t.this_thread;
 	}
     pthread_mutex_unlock(&thread_mem);
 }
 
-void wait_for_thread(thread t)
+void wait_for_thread(k_thread t)
 {
-    pthread_join(t->thread,null);
+    pthread_join(t.thread,null);
 }
-void stop_thread(thread t)
+void stop_thread(k_thread t)
 {
-    pthread_exit(t->this_thread.thread_return);
+    pthread_exit(t.this_thread.thread_return);
 }
 //returns 0 if not running
 //1 if running

@@ -43,7 +43,6 @@ void wait_motor(dcmotor this_motor, dcmotor_position position){
 	bmd(this_motor->port);
 }
 
-void
 void kill_motor(dcmotor this_motor){
 	off(this_motor->port);
 }

@@ -4,8 +4,16 @@
 #include "create_config.h"
 #include "create_sensor.h"
 
+#define CREATE_RADIUS 129.0
+#define CREATE_WHEELCIRCUM 65.1
+#define DEG_2_RAD (PI / 180.0)
+
+//move the creeate's wheels at independent speeds
 void create_direct(int rspeed, int lspeed)
 {
+	if(lspeed > 500 || lspeed < -500 || rspeed > 500 || rspeed < -500){
+		printf("Invalid Create Speed, create_direct(%d, %d)\n", rspeed, lspeed);
+	}
 	CREATE_BUSY;
 	serial_write_byte(145);
 	serial_write_byte(get_high_byte(rspeed));
@@ -14,6 +22,7 @@ void create_direct(int rspeed, int lspeed)
 	serial_write_byte(get_low_byte(lspeed));
 	CREATE_FREE;
 }
+//move the create straight at a given speed
 void create_straight(int speed)
 {
 	CREATE_BUSY;
@@ -50,6 +59,20 @@ void create_spin(int omega)
 		serial_write_byte(1);
 	}
 }
+void create_spin_b(float omega){
+	int speed = (int)(omega * CREATE_RADIUS * PI / 180.0);
+	create_direct(speed, -speed);
+}
+void create_straight_b(float velocity){
+	int speed = (int)(velocity);
+	create_direct(speed, speed);
+}
+void create_arc_b(float radius, float omega){
+	int lspeed = (int)(omega * DEG_2_RAD * (radius - CREATE_RADIUS));
+	int rspeed = (int)(omega * DEG_2_RAD * (radius + CREATE_RADIUS));
+	create_direct(rspeed, lspeed);
+}
+
 //Smart Drive Functions, Speed always positive
 void create_cease()
 {
@@ -116,40 +139,5 @@ void create_spin_angle(unsigned int speed, int angle)
 	}
 	CREATE_FREE;
 	create_wait_theta(angle);
-}
-void create_translate(float x, float y, unsigned int speed)
-{
-	float phi = abs(atan((float)y / (float)x));
-	float theta = abs((PI / 2.0) - phi);
-	float length = sqrt((x * x + y * y) / 4.0);
-	float radius = length * sin(phi) / sin(theta);
-	phi *= (180.0 / PI);
-	theta *= (180.0 / PI);
-	if(x > 0)
-	{
-		if(y > 0)
-		{
-			create_drive_arc(speed, (int)(radius * -1.0), (int)(theta * -1.0));
-			create_drive_arc(speed, (int)radius, (int)theta);
-		}
-		if(y < 0)
-		{
-			create_drive_arc(speed, (int)(radius * -1.0), (int)theta);
-			create_drive_arc(speed, (int)radius, (int)(theta * -1.0));
-		}
-	}
-	if(x < 0)
-	{
-		if(y > 0)
-		{
-			create_drive_arc(speed, (int)radius, (int)theta);
-			create_drive_arc(speed, (int)(radius * -1.0), (int)(theta * -1.0));
-		}
-		if(y < 0)
-		{
-			create_drive_arc(speed, (int)radius, (int)(theta * -1.0));
-			create_drive_arc(speed, (int)(radius * -1.0), (int)theta);
-		}
-	}
 }
 #endif

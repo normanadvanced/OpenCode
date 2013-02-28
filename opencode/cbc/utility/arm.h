@@ -12,57 +12,109 @@
 #include "/usr/include/kovan/thread.h"
 
 pthread_mutex_t arm_mem = PTHREAD_MUTEX_INITIALIZER;
-pthread_mutex_t freeze_mem = PTHREAD_MUTEX_INITIALIZER;
 int thread_num;
-int position;
-
-void *update_arm(void *p)
+pthread_t t_thread;
+void *raise_arm_t()
 {
     pthread_mutex_lock(&arm_mem);
-    while(1)
+
+    printf("Raising\n");
+    mav(RIGHT_MOTOR,-1000);
+    mav(LEFT_MOTOR,-1000);
+    while(analog10(ROT_POT)>UP_POS)
     {
-        while(analog10(ROT_POT)<position-15)
-        {
-            printf("1");
-            mav(RIGHT_MOTOR,300);
-            mav(LEFT_MOTOR,300);
-            msleep(100);
-        }
-        freeze(RIGHT_MOTOR);
-        freeze(LEFT_MOTOR);
-        while(analog10(ROT_POT)>position+15)
-        {
-            printf("2");
-            mav(RIGHT_MOTOR,-900);
-            mav(LEFT_MOTOR,-900);
-            msleep(100);
-        }
-        freeze(RIGHT_MOTOR);
-        freeze(LEFT_MOTOR);
-        msleep(100);
+        msleep(3);
     }
+    printf("Raised\n");
+    motor(RIGHT_MOTOR,-10);
+    motor(LEFT_MOTOR,-10);
+
     pthread_mutex_unlock(&arm_mem);
 }
 
-void set_arm_pos(int pos)
+void *set_arm_t()
 {
-    position = pos;
+    pthread_mutex_lock(&arm_mem);
+    printf("setting\n");
+    if(analog10(ROT_POT)>SCORE_POS)
+    {
+        mav(RIGHT_MOTOR,-500);
+        mav(LEFT_MOTOR,-500);
+    }
+    while(analog10(ROT_POT)>SCORE_POS)
+    {
+        msleep(5);
+    }
+    off(RIGHT_MOTOR);
+    off(LEFT_MOTOR);
+    if(analog10(ROT_POT)<SCORE_POS)
+    {
+        mav(RIGHT_MOTOR,200);
+        mav(LEFT_MOTOR,200);
+    }
+    while(analog10(ROT_POT)<SCORE_POS)
+    {
+        msleep(5);
+    }
+    off(RIGHT_MOTOR);
+    off(LEFT_MOTOR);
+    printf("set\n");
+    pthread_mutex_unlock(&arm_mem);
 }
-int arm_position()
+void *lower_arm_t()
 {
-    return position;
+    pthread_mutex_lock(&arm_mem);
+    printf("Lowering\n");
+    mav(RIGHT_MOTOR,400);
+    mav(LEFT_MOTOR,400);
+    while(analog10(ROT_POT)<DOWN_POS)
+    {
+        msleep(5);
+    }
+    printf("Lowered\n");
+    off(RIGHT_MOTOR);
+    off(LEFT_MOTOR);
+    pthread_mutex_unlock(&arm_mem);
 }
-
-void wait_for_arm(int pos)
-{
-    while(!(arm_position()<pos+15 && arm_position()>pos-15))
-        msleep(10);
-}
-void start_arm()
+void raise_arm()
 {
     printf("Attempting thread");
-    pthread_t t_thread;
-    if((thread_num = pthread_create(&t_thread, NULL, update_arm,(void*)0)))
+    if((thread_num = pthread_create(&t_thread, NULL, raise_arm_t,(void*)0)))
+	{
+		printf("Threading Failure: %d\n", thread_num);
+	}
+	else
+	{
+       printf("Threading success\n");
+	}
+}
+
+void set_arm()
+{
+    printf("Attempting thread");
+    if((thread_num = pthread_create(&t_thread, NULL, set_arm_t,(void*)0)))
+	{
+		printf("Threading Failure: %d\n", thread_num);
+	}
+	else
+	{
+       printf("Threading success\n");
+	}
+}
+void wait_for_arm()
+{
+    pthread_join(t_thread, NULL);
+}
+
+void wait_for_arm_pos(int pos)
+{
+    while(analog10(ROT_POT)>pos)
+        msleep(10);
+}
+void lower_arm()
+{
+    printf("Attempting thread");
+    if((thread_num = pthread_create(&t_thread, NULL, lower_arm_t,(void*)0)))
 	{
 		printf("Threading Failure: %d\n", thread_num);
 	}
