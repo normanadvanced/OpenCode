@@ -130,8 +130,7 @@ void create_wait_duration(int dseconds)
 {
 	CREATE_BUSY;
 	serial_write_byte(155);
-	serial_write_byte(get_high_byte(dseconds));
-	serial_write_byte(get_low_byte(dseconds));
+	serial_write_byte(dseconds);
 	CREATE_FREE;
 }
 void create_wait_sensor(int packet_id)
@@ -182,12 +181,11 @@ void create_sync()
     serial_write_byte(142);
     serial_write_byte(35);
 
-    while(read_count == 0)
+    while(read_count == 0 || read_count == -1)
 	{
 		#ifdef __arm__
-        read_count += create_read_block(buffer+read_count, count-read_count);
-        printf("%d", create_read_block(buffer+read_count, count-read_count));
-        msleep(1000);
+        read_count = create_read_block(buffer+0, count-read_count);
+        msleep(2);
 		#endif
 	}
 
