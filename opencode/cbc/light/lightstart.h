@@ -124,7 +124,7 @@ void lightstart(int port, float kill_time)
 		msleep(10L);
 	}
 	printf("Program Running!\nEnding in %.2f seconds!\n", kill_time);
-	main_process_attributes->start_process_time = seconds();
-	pthread_create(&kill_thread, NULL, wait_to_kill, (void *)main_process_attributes);
+	//main_process_attributes->start_process_time = seconds();
+	//pthread_create(&kill_thread, NULL, wait_to_kill, (void *)main_process_attributes);
 }
 #endif
