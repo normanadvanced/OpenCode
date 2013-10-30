@@ -14,7 +14,7 @@ void build_left_wheel(int port, long ticks_cycle, float speed_proportion, float 
 // 0 <--> 3 (port), ~1100 (ticks), 1.0 + | - 0.25 (unitless), + in mm, + in mm
 //Shortcut to build the left wheel structure to be utilized by various functions
 
-void build_left_wheel(int port, long ticks_cycle, float speed_proportion, float wheel_diameter, float radial_distance);
+void build_right_wheel(int port, long ticks_cycle, float speed_proportion, float wheel_diameter, float radial_distance);
 // 0 <--> 3 (port), ~1100 (ticks), 1.0 + | - 0.25 (unitless), + in mm, + in mm
 //Shortcut to build the right wheel structure to be utilized by various functions
 
@@ -132,8 +132,8 @@ int cbc_direct(int lspeed, int rspeed)
 }
 int cbc_straight(int speed, float distance)
 {
-	float lticks = (distance * left.wheel.ticks_cycle) / (left.wheel.wheel_diameter * PI);
-	float rticks = (distance * right.wheel.ticks_cycle) / (right.wheel.wheel_diameter * PI);
+	float lticks = ((distance * left.wheel.ticks_cycle) / (left.wheel.wheel_diameter * PI)) * left.wheel.speed_proportion;
+	float rticks = ((distance * right.wheel.ticks_cycle) / (right.wheel.wheel_diameter * PI)) * right.wheel.speed_proportion;
 	float lspeed = (float)speed * left.wheel.speed_proportion;
 	float rspeed = (float)speed * right.wheel.speed_proportion;
 
@@ -157,8 +157,8 @@ int cbc_arc(int speed, float radius, float theta) // 0 <--> 1000 (unitless), + |
 	float arc_length = radius * theta * DEG_TO_RAD;
 	float ldistance = (radius - left.wheel.radial_distance) * theta * DEG_TO_RAD;
 	float rdistance = (radius + right.wheel.radial_distance) * theta * DEG_TO_RAD;
-	float lticks = (ldistance * left.wheel.ticks_cycle) / (left.wheel.wheel_diameter * PI);
-	float rticks = (rdistance * right.wheel.ticks_cycle) / (right.wheel.wheel_diameter * PI);
+	float lticks = left.wheel.speed_proportion * ((ldistance * left.wheel.ticks_cycle) / (left.wheel.wheel_diameter * PI));
+	float rticks = right.wheel.speed_proportion * ((rdistance * right.wheel.ticks_cycle) / (right.wheel.wheel_diameter * PI));
 	float lspeed = (float)speed * left.wheel.speed_proportion * ldistance / arc_length;
 	float rspeed = (float)speed * right.wheel.speed_proportion * rdistance / arc_length;
 
@@ -181,8 +181,8 @@ int cbc_spin(int speed, float theta)
 {
 	float ldistance = -1.0 * left.wheel.radial_distance * theta * DEG_TO_RAD;
 	float rdistance = right.wheel.radial_distance * theta * DEG_TO_RAD;
-	float lticks = (ldistance * left.wheel.ticks_cycle) / (left.wheel.wheel_diameter * PI);
-	float rticks = (rdistance * right.wheel.ticks_cycle) / (right.wheel.wheel_diameter * PI);
+	float lticks = left.wheel.speed_proportion * ((ldistance * left.wheel.ticks_cycle) / (left.wheel.wheel_diameter * PI));
+	float rticks = right.wheel.speed_proportion * ((rdistance * right.wheel.ticks_cycle) / (right.wheel.wheel_diameter * PI));
 	float lspeed = (float)speed * left.wheel.speed_proportion * left.wheel.radial_distance / (left.wheel.radial_distance + left.wheel.radial_distance);
 	float rspeed = (float)speed * right.wheel.speed_proportion * right.wheel.radial_distance / (right.wheel.radial_distance + right.wheel.radial_distance);
 
