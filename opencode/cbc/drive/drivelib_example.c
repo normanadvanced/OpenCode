@@ -27,7 +27,7 @@ int main()
 	cbc_spin(350, 90.0);
 	//Spin at requested speed 350 for +90.0 degrees (CCW)
 
-	wait_cbc();
+	cbc_wait();
 	//Wait for the cbc to finish its movement
 
 	cbc_arc(400, -300.0, 90.0);
