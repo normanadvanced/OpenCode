@@ -33,6 +33,7 @@ void create_straight(int speed)
 	serial_write_byte(get_low_byte(speed));
 	CREATE_FREE;
 }
+//move the create in an arc of a given radius at a given speed
 void create_arc(int speed, int radius)
 {
 	CREATE_BUSY;
@@ -43,6 +44,7 @@ void create_arc(int speed, int radius)
 	serial_write_byte(get_low_byte(radius));
 	CREATE_FREE;
 }
+//turn the create in place at a given speed
 void create_spin(int omega)
 {
 	serial_write_byte(137);
@@ -59,14 +61,17 @@ void create_spin(int omega)
 		serial_write_byte(1);
 	}
 }
+//turn the create in place at a given speed, alternate
 void create_spin_b(float omega){
 	int speed = (int)(omega * CREATE_RADIUS * PI / 180.0);
 	create_direct(speed, -speed);
 }
+//move the create straight at a given speed, alternate
 void create_straight_b(float velocity){
 	int speed = (int)(velocity);
 	create_direct(speed, speed);
 }
+//move the create in an arc of a given radius at a given speed, alternate
 void create_arc_b(float radius, float omega){
 	int lspeed = (int)(omega * DEG_2_RAD * (radius - CREATE_RADIUS));
 	int rspeed = (int)(omega * DEG_2_RAD * (radius + CREATE_RADIUS));
@@ -74,11 +79,16 @@ void create_arc_b(float radius, float omega){
 }
 
 //Smart Drive Functions, Speed always positive
+
+//stop create and sync with controller
 void create_cease()
 {
 	create_stop();
 	create_sync();
 }
+//move the create in an arc of a given radius at a given speed for a given angle
+//if radius and angle are of opposite sign, the create will go backward
+//do not put a negative speed
 void create_drive_arc(unsigned int speed, int radius, float angle)
 {
 	CREATE_BUSY;
@@ -98,6 +108,7 @@ void create_drive_arc(unsigned int speed, int radius, float angle)
 	CREATE_FREE;
 	create_wait_theta(angle);
 }
+//move the create straight at a given speed for a given distance
 void create_drive_segment(unsigned int speed, int distance)
 {
 	CREATE_BUSY;
@@ -119,6 +130,7 @@ void create_drive_segment(unsigned int speed, int distance)
 	CREATE_FREE;
 	create_wait_length(distance);
 }
+//trun the create in place at a given speed for a given angle
 void create_spin_angle(unsigned int speed, int angle)
 {
 	CREATE_BUSY;

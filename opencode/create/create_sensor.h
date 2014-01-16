@@ -140,6 +140,7 @@ void create_wait_sensor(int packet_id)
 	serial_write_byte(packet_id);
 	CREATE_FREE;
 }
+//move create at given wheel speeds until front bump sensor is hit
 void create_drive_bump(int rvel,int lvel)
 {
 	CREATE_BUSY;
@@ -169,6 +170,12 @@ void create_drive_touch(int rspeed, int lspeed, int rport, int lport)
 		}
 	}
 }
+//sync the create movements with the controller
+//when we write create bytes, all the bytes are sent at once
+//the create then executes them sequentially
+//to force the controller to wait for the create to finish
+//(e.g. waiting for the create to get to an item before lifting the arm servo)
+//call this fucntion to block the program
 void create_sync()
 {
 	char buffer[1];
