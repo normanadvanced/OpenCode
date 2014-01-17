@@ -14,4 +14,5 @@
 #include "opencode/create/create_music.h"
 #include "opencode/create/create_script.h"
 #include "opencode/create/create_sensor.h"
+#include "opencode/create/create_depth.h"
 #endif
