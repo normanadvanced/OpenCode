@@ -44,10 +44,8 @@ servo_movement build_servo_movement(int position, int tpm, long latency)
 	new_movement->latency = latency;
 	return(new_movement);
 }
-void *control_servo(void *ptr_servo)
+void move_servo(servo build_properties,servo_movement move_properties)
 {
-	pthread_mutex_lock(&servo_mem);
-	servo build_properties = (struct servo_properties *) ptr_servo;
 	int i, delta;
 	int initial = get_servo_position(build_properties->port);
 	delta = (build_properties->next_position - initial) / (build_properties->next_tpm);
@@ -83,28 +81,15 @@ void *control_servo(void *ptr_servo)
 		printf("Invalid Movement of Servo: %d", build_properties->port);
 	}
 	build_properties->is_moving = 0;
-	pthread_mutex_unlock(&servo_mem);
-}
-void move_servo(servo build_properties,servo_movement move_properties)
-{
-	int thread_num;
-	pthread_t this_thread;
-	build_properties->is_moving = 1;
-	build_properties->next_position = move_properties->position;
-	build_properties->next_tpm = move_properties->tpm;
-	build_properties->next_latency = move_properties->latency;
-	if((thread_num = pthread_create(&this_thread, NULL, &control_servo, (void *)build_properties)))
-	{
-		printf("Threading Failure: %d\n", thread_num);
-	}
-	else
-	{
-		build_properties->process_id = this_thread;
-	}
 }
 void bsd(servo build_properties)
 {
-	pthread_join(build_properties->process_id, NULL);
+	//pthread_join(build_properties->process_id, NULL);
+
+	while(get_servo_position(build_properties->port) != build_properties->next_position)
+	{
+		msleep(5);
+	}
 }
 void wait_servo(servo build_properties, servo_movement move_properties)
 {
