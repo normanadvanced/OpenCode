@@ -8,7 +8,7 @@
 #define CREATE_WHEELCIRCUM 65.1
 #define DEG_2_RAD (PI / 180.0)
 
-//move the creeate's wheels at independent speeds
+//move the create's wheels at independent speeds
 void create_direct(int rspeed, int lspeed)
 {
 	if(lspeed > 500 || lspeed < -500 || rspeed > 500 || rspeed < -500){
@@ -109,6 +109,7 @@ void create_drive_arc(unsigned int speed, int radius, float angle)
 	create_wait_theta(angle);
 }
 //move the create straight at a given speed for a given distance
+//use negative distance to go backward, speed is always positive
 void create_drive_segment(unsigned int speed, int distance)
 {
 	CREATE_BUSY;
@@ -131,6 +132,7 @@ void create_drive_segment(unsigned int speed, int distance)
 	create_wait_length(distance);
 }
 //trun the create in place at a given speed for a given angle
+//positive angle is counter-clockwise
 void create_spin_angle(unsigned int speed, int angle)
 {
 	CREATE_BUSY;
