@@ -220,9 +220,6 @@ int cbc_align_black()
 {
 	long ltimeout = left.tophat.timeout;
 	long rtimeout = right.tophat.timeout;
-	//set_analog_floats(0); //revmoved for new function name in libkovan
-	set_analog_pullup(left.tophat.port, 0);
-	set_analog_pullup(right.tophat.port, 0);
 	mav(left.wheel.port, left.wheel.last_requested_speed);
 	mav(right.wheel.port, right.wheel.last_requested_speed);
 	while((ltimeout > 0 || rtimeout > 0) && (analog10(left.tophat.port) < (left.tophat.white + left.tophat.error) || analog10(right.tophat.port) < (right.tophat.white + right.tophat.error)))
@@ -244,9 +241,6 @@ int cbc_align_white()
 {
 	long ltimeout = left.tophat.timeout;
 	long rtimeout = right.tophat.timeout;
-	//set_analog_floats(0); //revmoved for new function name in libkovan
-	set_analog_pullup(left.tophat.port, 0);
-	set_analog_pullup(right.tophat.port, 0);
 	mav(left.wheel.port, left.wheel.last_requested_speed);
 	mav(right.wheel.port, right.wheel.last_requested_speed);
 	while((ltimeout > 0 || rtimeout > 0) && (analog10(left.tophat.port) > (left.tophat.black - left.tophat.error) || analog10(right.tophat.port) > (right.tophat.black - right.tophat.error)))
