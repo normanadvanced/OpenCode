@@ -15,10 +15,12 @@ struct run_table
 };
 void kill_servos()
 {
+	/*
 	pthread_kill(cbcservo[0].process_id, 1);
 	pthread_kill(cbcservo[1].process_id, 1);
 	pthread_kill(cbcservo[2].process_id, 1);
 	pthread_kill(cbcservo[3].process_id, 1);
+	*/
 }
 void *wait_to_kill(void *process_prop)
 {

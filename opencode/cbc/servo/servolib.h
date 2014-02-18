@@ -1,10 +1,8 @@
 #ifndef __SERVOLIB_H__
 #define __SERVOLIB_H__
 
-#include "/usr/include/pthread.h"
 #include <math.h>
 #include <malloc.h>
-#include "/usr/include/kovan/kovan.h"
 
 struct servo_properties
 {
@@ -14,7 +12,6 @@ struct servo_properties
 	int next_tpm;
 	int next_position;
 	int is_moving;
-	pthread_t process_id;
 	long next_latency;
 }cbcservo[4];
 
@@ -27,7 +24,6 @@ struct servo_movement
 
 typedef struct servo_movement *servo_movement;
 typedef struct servo_properties *servo;
-pthread_mutex_t servo_mem = PTHREAD_MUTEX_INITIALIZER;
 
 servo build_servo(int port, int min, int max)
 {
@@ -84,8 +80,6 @@ void move_servo(servo build_properties,servo_movement move_properties)
 }
 void bsd(servo build_properties)
 {
-	//pthread_join(build_properties->process_id, NULL);
-
 	while(get_servo_position(build_properties->port) != build_properties->next_position)
 	{
 		msleep(5);
