@@ -2,7 +2,6 @@
 #define __DRIVELIB_H__
 
 #include <stdio.h>
-#include <pthread.h>
 
 #include "/usr/include/kovan/kovan.h"
 #include "../sensor/sensorlib.h"
@@ -282,16 +281,10 @@ void *accel_bump(void *this_accel)
 }
 void cbc_sense_accel()
 {
-	int thread_num;
-	pthread_t this_thread;
 	acceleramator.x_knaught[1] = accel_x();
 	acceleramator.x_knaught[2] = accel_y();
 	acceleramator.x_knaught[3] = accel_z();
 	struct cbc_accel *here = &acceleramator;
-	if((thread_num = pthread_create(&this_thread, NULL, &accel_bump, (void *)here)))
-	{
-		printf("Threading Failure: %d\n", thread_num);
-	}
 }
 #endif
 

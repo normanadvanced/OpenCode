@@ -1,13 +1,11 @@
 #ifndef __MOTORLIB_H__
 #define __MOTORLIB_H__
 
-#include <pthread.h>
 #include "../sensor/sensorlib.h"
 #include "/usr/include/kovan/kovan.h"
 struct motor_attributes{
 	int port, min, max;
 	long tick_cycle;
-	pthread_t thread_id;
 	analog_sensor map_sensor;
 }cbcmotor[4];
 struct motor_movement_attributes
