@@ -7,6 +7,7 @@
 #include "opencode/cbc/drive/drivelib.h"
 #include "opencode/cbc/light/lightstart.h"
 #include "opencode/cbc/sensor/sensorlib.h"
+#include "opencode/cbc/sensor/link_depth.h"
 #include "opencode/cbc/servo/servolib.h"
 #include "opencode/create/create_accel.h"
 #include "opencode/create/create_config.h"
