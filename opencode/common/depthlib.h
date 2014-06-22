@@ -102,4 +102,14 @@ int get_angle_to_point(int row)
 	}
 }
 
+void open_depth_safely(int attepmts)
+{
+	int times=0;
+	while(depth_open()==0 && times<attepmts)
+	{
+		printf("Cannot open Xtion\n");
+		msleep(700);
+	}
+}
+
 #endif
