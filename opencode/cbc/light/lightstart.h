@@ -1,51 +1,15 @@
 #ifndef __LIGHTSTART_H__
 #define __LIGHTSTART_H__
 
-#include <pthread.h>
-
-#include "/usr/include/kovan/kovan.h"
 #include "../servo/servolib.h"
 
-pthread_mutex_t kill_mem = PTHREAD_MUTEX_INITIALIZER;
-
-struct run_table
-{
-	pthread_t thread_id;
-	float process_kill_time, start_process_time;
-};
-void kill_servos()
-{
-	/*
-	pthread_kill(cbcservo[0].process_id, 1);
-	pthread_kill(cbcservo[1].process_id, 1);
-	pthread_kill(cbcservo[2].process_id, 1);
-	pthread_kill(cbcservo[3].process_id, 1);
-	*/
-}
-void *wait_to_kill(void *process_prop)
-{
-	pthread_mutex_trylock(&kill_mem);
-	struct run_table *killer = (struct run_table *) process_prop;
-	sleep(killer->process_kill_time);
-	pthread_kill(killer->thread_id, 1);
-	printf("/nProgram Killed After %.2f seconds", seconds() - killer->start_process_time);
-	process_prop = NULL;
-	pthread_mutex_unlock(&kill_mem);
-	pthread_exit(process_prop);
-}
 void lightstart(int port, float kill_time)
 {
-	int i, light_process;
+	int i;
 	int light_off = -1;
 	int light_on = -1;
-	pthread_t kill_thread;
-
-	struct run_table *main_process_attributes = malloc(sizeof(struct run_table));
-	main_process_attributes->process_kill_time = kill_time;
-	main_process_attributes->thread_id = pthread_self();
 
 	//set_analog_floats(0); //revmoved for new function name in libkovan
-	set_analog_pullup(port, 0);
 	printf("A Button :\tCalibrate for Light Start in Port #%d\n", port);
 	printf("B Button :\tRun Now!\n");
 	while(1)
@@ -126,7 +90,6 @@ void lightstart(int port, float kill_time)
 		msleep(10L);
 	}
 	printf("Program Running!\nEnding in %.2f seconds!\n", kill_time);
-	//main_process_attributes->start_process_time = seconds();
-	//pthread_create(&kill_thread, NULL, wait_to_kill, (void *)main_process_attributes);
+	shut_down_in(kill_time);;
 }
 #endif
