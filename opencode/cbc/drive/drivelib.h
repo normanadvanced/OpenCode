@@ -138,7 +138,7 @@ int cbc_straight(int speed, float distance)
 
 	if(rspeed > 1000 || lspeed > 1000 || rspeed < -1000 || lspeed < -1000)
 	{
-		printf("\nWarning! Invalid Speed\n");
+		printf("\nWarning! Invalid CBC Speed\n");
 		return -1;
 	}
 	else
@@ -163,7 +163,7 @@ int cbc_arc(int speed, float radius, float theta) // 0 <--> 1000 (unitless), + |
 
 	if(rspeed > 1000 || lspeed > 1000 || rspeed < -1000 || lspeed < -1000)
 	{
-		printf("\nWarning! Invalid Speed, Please Lower\n");
+		printf("\nWarning! Invalid CBC Speed\n");
 		return -1;
 	}
 	else
@@ -187,7 +187,7 @@ int cbc_spin(int speed, float theta)
 
 	if(rspeed > 1000 || lspeed > 1000 || rspeed < -1000 || lspeed < -1000)
 	{
-		printf("\nWarning! Invalid Speed, Please Lower\n");
+		printf("\nWarning! Invalid CBC Speed\n");
 		return -1;
 	}
 	else
