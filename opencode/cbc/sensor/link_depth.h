@@ -64,4 +64,30 @@ void cbc_align_depth_dist_one(int speed, int distance, float aggressiveness, int
 	cbc_halt();
 }
 
+void cbc_align_depth_side_midpint(int speed, int middle, float aggressiveness, int row, int error, float timeout)
+{
+	float time_init=seconds();
+
+	int current_error=1000;
+
+	depth_open();
+	depth_update();
+	depth_scanline_update(row);
+
+	int midpoint=(get_depth_scanline_object_center_x(0)+get_depth_scanline_object_center_x(1))/2;
+
+	int drive_speed=0;
+
+	while(seconds() < (time_init+timeout) && midpoint < (middle - error) || midpoint > (middle + error))
+	{
+		drive_speed=(midpoint-middle)*aggressiveness;
+		cbc_direct(drive_speed, drive_speed);
+		depth_update();
+		depth_scanline_update(row);
+		midpoint=(get_depth_scanline_object_center_x(0)+get_depth_scanline_object_center_x(1))/2;
+		msleep(5);
+	}
+	cbc_halt();
+}
+
 #endif
