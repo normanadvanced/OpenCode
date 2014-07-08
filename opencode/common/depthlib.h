@@ -72,6 +72,77 @@ int get_two_points_angle(int row)
 	}
 }
 
+int get_two_points_angle_w_bound(int row, int max_depth)
+{
+	int first_center_x=-1;
+	int first_center_z=-1;
+	
+	int second_center_x=-1;
+	int second_center_z=-1;
+	
+	int left_center_x=-1;
+	int left_center_z=-1;
+	
+	int right_center_x=-1;
+	int right_center_z=-1;
+	
+	int theta=0;
+	
+	int objCount=0;
+	
+	depth_update();
+	
+	depth_scanline_update(row);
+	
+	if(get_depth_scanline_object_count() > 0)
+	{
+		for(objCount=0;objCount<get_depth_scanline_object_count();objCount++)
+		{
+			if(get_depth_scanline_object_center_z(objCount) < max_depth)
+			{
+				if(first_center_x==-1)
+				{
+					first_center_x = get_depth_scanline_object_center_x(objCount);
+					first_center_z = get_depth_scanline_object_center_z(objCount);
+				}
+				else
+				{
+					second_center_x = get_depth_scanline_object_center_x(objCount);
+					second_center_z = get_depth_scanline_object_center_z(objCount);
+					break;
+				}
+			}
+		}
+		
+		if(first_center_x < second_center_x)
+		{
+			left_center_x = first_center_x;
+			left_center_z = first_center_z;
+			
+			right_center_x = second_center_x;
+			right_center_z = second_center_z;
+		}
+		else
+		{
+			left_center_x = second_center_x;
+			left_center_z = second_center_z;
+			
+			right_center_x = first_center_x;
+			right_center_z = first_center_z;
+		}
+		
+		if(left_center_x != -1 && left_center_z != -1 && right_center_x != -1 && right_center_z != -1)
+		{
+			return atan2(right_center_z - left_center_z, right_center_x - left_center_x) * 180.0 / M_PI;
+		}
+		else
+		{
+			printf("Bad Depth Data at row %d\n", row);
+			return 0;
+		}
+	}
+}
+
 int get_angle_to_point(int row)
 {	
 	int nearest_x=-1;

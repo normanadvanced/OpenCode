@@ -4,7 +4,7 @@
 #include "../../common/depthlib.h"
 #include "../drive/drivelib.h"
 
-void cbc_align_depth_spin_two(int speed, int row, int tries)
+void cbc_align_depth_spin_two(int speed, int row, int tries, int max_depth)
 {
 	depth_open();
 
@@ -12,7 +12,7 @@ void cbc_align_depth_spin_two(int speed, int row, int tries)
 	
 	int current_try = 1;
 
-	while(current_try <= tries && abs(theta = get_two_points_angle(row)) > depth_sensor.error)
+	while(current_try <= tries && abs(theta = get_two_points_angle_w_bound(row, max_depth)) > depth_sensor.error)
 	{
 		cbc_spin(speed, theta);
 		
