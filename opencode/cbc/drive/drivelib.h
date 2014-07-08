@@ -111,7 +111,10 @@ void cbc_wait(int distance)
 	if(left.wheel.last_requested_speed != 0 && distance != 0)
 	{
 		//use a timer for the left wheel so we don't use bmd() . It is slow and inconsistent
-		int time = (int)(1000.0*(fabs((float)distance/((((float)left.wheel.last_requested_speed)*(float)left.wheel.wheel_diameter * PI)/(float)left.wheel.ticks_cycle))));
+		float up = (1000.0)*distance*left.wheel.ticks_cycle;
+		float down = left.wheel.last_requested_speed*left.wheel.wheel_diameter*PI;
+		
+		int time = (int)fabs(up/down);
 		msleep(time);
 	}
 }
