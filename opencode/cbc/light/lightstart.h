@@ -90,6 +90,6 @@ void lightstart(int port, float kill_time)
 		msleep(10L);
 	}
 	printf("Program Running!\nEnding in %.2f seconds!\n", kill_time);
-	shut_down_in(kill_time);;
+	shut_down_in(kill_time);
 }
 #endif
