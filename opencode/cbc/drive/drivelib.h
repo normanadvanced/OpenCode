@@ -123,8 +123,12 @@ void cbc_stop()
 }
 int cbc_direct(int lspeed, int rspeed)
 {
-	mav(left.wheel.port, lspeed);
-	mav(right.wheel.port,rspeed);
+	set_auto_publish(false);      // won't send every command one by one to kmod
+	publish();                    // send every enqueued package to kmod
+	mav(left.wheel.port, lspeed); // enqueue driving commands
+	mav(right.wheel.port,rspeed); // enqueue driving commands
+	set_auto_publish(true);       // send every command one by one to kmod
+	publish();                    // send enqueued driving commands at once to kmod
 	left.wheel.last_requested_speed = lspeed;
 	right.wheel.last_requested_speed = rspeed;
 	return 1;
