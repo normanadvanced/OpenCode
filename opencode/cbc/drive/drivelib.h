@@ -62,6 +62,7 @@ struct cbc_accel
 	float x_knaught[3];
 	long timeout;
 }acceleramator;
+float ticksPerMM = -1;
 void build_left_wheel(int port, long ticks_cycle, float speed_proportion, float wheel_diameter, float radial_distance)
 {
 	left.wheel.port = port;
@@ -110,11 +111,12 @@ void cbc_wait(int distance)
 {
 	if(left.wheel.last_requested_speed != 0 && distance != 0)
 	{
-		//use a timer for the left wheel so we don't use bmd() . It is slow and inconsistent
-		float up = (1000.0)*distance*left.wheel.ticks_cycle;
-		float down = left.wheel.last_requested_speed*left.wheel.wheel_diameter*PI;
+		if(ticksPerMM == -1){
+			ticksPerMM = (float)left.wheel.ticks_cycle/(left.wheel.wheel_diameter*PI);
+		}
 		
-		int time = (int)fabs(up/down);
+		//use a timer for the left wheel so we don't use bmd() . It is slow and inconsistent
+		int time = (int)fabs((1000.0*distance*ticksPerMM)/left.wheel.last_requested_speed);
 		msleep(time);
 	}
 }
