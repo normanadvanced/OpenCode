@@ -119,6 +119,13 @@ void cbc_halt()
 {
 	set_auto_publish(0); // won't send every command one by one to kmod
 	publish(); // send every enqueued package to kmod
+	freeze(left.wheel.port);
+	freeze(right.wheel.port);
+	set_auto_publish(1); // send every command one by one to kmod
+	publish(); // send enqueued driving commands at once to kmod
+	msleep(100);
+	set_auto_publish(0); // won't send every command one by one to kmod
+	publish(); // send every enqueued package to kmod
 	off(left.wheel.port);
 	off(right.wheel.port);
 	set_auto_publish(1); // send every command one by one to kmod
