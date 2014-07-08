@@ -106,25 +106,38 @@ void build_right_touch(int port, long timeout)
 	right.touch.port = port;
 	right.touch.timeout = timeout;
 }
-void cbc_wait()
+void cbc_wait(int distance)
 {
-	bmd(left.wheel.port);
-	bmd(right.wheel.port);
+	if(left.wheel.last_requested_speed != 0 && distance != 0)
+	{
+		//use a timer for the left wheel so we don't use bmd() . It is slow and inconsistent
+		int time = (int)(1000.0*(fabs((float)distance/((((float)left.wheel.last_requested_speed)*(float)left.wheel.wheel_diameter * PI)/(float)left.wheel.ticks_cycle))));
+		msleep(time);
+	}
 }
 void cbc_halt()
 {
+	set_auto_publish(0); // won't send every command one by one to kmod
+	publish(); // send every enqueued package to kmod
 	off(left.wheel.port);
 	off(right.wheel.port);
-}
-void cbc_stop()
-{
-	cbc_wait();
-	cbc_halt();
+	set_auto_publish(1); // send every command one by one to kmod
+	publish(); // send enqueued driving commands at once to kmod
 }
 int cbc_direct(int lspeed, int rspeed)
 {
-	mav(left.wheel.port, lspeed);
-	mav(right.wheel.port,rspeed);
+	set_auto_publish(0); // won't send every command one by one to kmod
+	publish(); // send every enqueued package to kmod
+	if(lspeed!=0)
+	{
+		mav(left.wheel.port, lspeed); // enqueue driving commands
+	}
+	if(rspeed!=0)
+	{
+		mav(right.wheel.port, rspeed); // enqueue driving commands
+	}
+	set_auto_publish(1); // send every command one by one to kmod
+	publish(); // send enqueued driving commands at once to kmod
 	left.wheel.last_requested_speed = lspeed;
 	right.wheel.last_requested_speed = rspeed;
 	return 1;
@@ -143,11 +156,15 @@ int cbc_straight(int speed, float distance)
 	}
 	else
 	{
-		mrp(left.wheel.port, (int)lspeed, (long)lticks);
-		mrp(right.wheel.port, (int)rspeed, (long)rticks);
-		cbc_wait();
-		left.wheel.last_requested_speed = (int)lspeed;
-		right.wheel.last_requested_speed = (int)rspeed;
+		if(distance>0.0)
+		{
+			cbc_direct(lspeed, rspeed);
+		}
+		else if(distance<0.0)
+		{
+			cbc_direct(-lspeed, -rspeed);
+		}
+		cbc_wait(distance);
 		return 1;
 	}
 }
@@ -168,11 +185,16 @@ int cbc_arc(int speed, float radius, float theta) // 0 <--> 1000 (unitless), + |
 	}
 	else
 	{
-		mrp(left.wheel.port, (int)lspeed, (long)lticks);
-		mrp(right.wheel.port, (int)rspeed, (long)rticks);
-		cbc_wait();
-		left.wheel.last_requested_speed = (int)lspeed;
-		right.wheel.last_requested_speed = (int)rspeed;
+		if(rdistance>0.0)
+		{
+			cbc_direct(-lspeed, rspeed);
+		}
+		else if(rdistance<0.0)
+		{
+			cbc_direct(lspeed, -rspeed);
+		}
+		cbc_direct(lspeed, rspeed);
+		cbc_wait(ldistance);
 		return 1;
 	}
 }
@@ -192,11 +214,15 @@ int cbc_spin(int speed, float theta)
 	}
 	else
 	{
-		mrp(left.wheel.port, (int)lspeed, (long)lticks);
-		mrp(right.wheel.port, (int)rspeed, (long)rticks);
-		cbc_wait();
-		left.wheel.last_requested_speed = (int)lspeed;
-		right.wheel.last_requested_speed = (int)rspeed;
+		if(theta>0.0)
+		{
+			cbc_direct(-lspeed, rspeed);
+		}
+		else if(theta<0.0)
+		{
+			cbc_direct(lspeed, -rspeed);
+		}
+		cbc_wait(ldistance);
 		return 1;
 	}
 
@@ -205,8 +231,7 @@ int cbc_align_touch()
 {
 	long ltimeout = left.touch.timeout;
 	long rtimeout = right.touch.timeout;
-	mav(left.wheel.port, left.wheel.last_requested_speed);
-	mav(right.wheel.port, right.wheel.last_requested_speed);
+	cbc_direct(left.wheel.last_requested_speed, right.wheel.last_requested_speed);
 	while(ltimeout > 0 && rtimeout > 0 && !digital(left.tophat.port) && !digital(right.tophat.port))
 	{
 
@@ -219,8 +244,7 @@ int cbc_align_black()
 {
 	long ltimeout = left.tophat.timeout;
 	long rtimeout = right.tophat.timeout;
-	mav(left.wheel.port, left.wheel.last_requested_speed);
-	mav(right.wheel.port, right.wheel.last_requested_speed);
+	cbc_direct(left.wheel.last_requested_speed, right.wheel.last_requested_speed);
 	while((ltimeout > 0 || rtimeout > 0) && (analog10(left.tophat.port) < (left.tophat.white + left.tophat.error) || analog10(right.tophat.port) < (right.tophat.white + right.tophat.error)))
 	{
 		if(analog10(left.tophat.port) > (left.tophat.black - left.tophat.error))
@@ -240,8 +264,7 @@ int cbc_align_white()
 {
 	long ltimeout = left.tophat.timeout;
 	long rtimeout = right.tophat.timeout;
-	mav(left.wheel.port, left.wheel.last_requested_speed);
-	mav(right.wheel.port, right.wheel.last_requested_speed);
+	cbc_direct(left.wheel.last_requested_speed, right.wheel.last_requested_speed);
 	while((ltimeout > 0 || rtimeout > 0) && (analog10(left.tophat.port) > (left.tophat.black - left.tophat.error) || analog10(right.tophat.port) > (right.tophat.black - right.tophat.error)))
 	{
 		if(analog10(left.tophat.port) < (left.tophat.white + left.tophat.error))
