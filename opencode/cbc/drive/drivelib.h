@@ -147,10 +147,14 @@ int cbc_direct(int lspeed, int rspeed)
 	if(lspeed!=0)
 	{
 		mav(left.wheel.port, lspeed); // enqueue driving commands
+	}else{
+		freeze(left.wheel.port);
 	}
 	if(rspeed!=0)
 	{
 		mav(right.wheel.port, rspeed); // enqueue driving commands
+	}else{
+		freeze(right.wheel.port);
 	}
 	set_auto_publish(1); // send every command one by one to kmod
 	publish(); // send enqueued driving commands at once to kmod
