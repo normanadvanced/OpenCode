@@ -8,7 +8,7 @@ void cbc_align_depth_spin_two(int speed, int row, int tries)
 {
 	depth_open();
 
-	int theta;
+	int theta=0;
 	
 	int current_try = 1;
 
@@ -25,7 +25,7 @@ void cbc_align_depth_spin_one(int speed, int row, int tries)
 {
 	depth_open();
 
-	int theta;
+	int theta=0;
 	
 	int current_try = 1;
 
