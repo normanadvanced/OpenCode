@@ -42,6 +42,7 @@ struct cbc_side
 		float speed_proportion;
 		float wheel_diameter;
 		float radial_distance;
+		float ticks_per_mm;
 	}wheel;
 	struct lincolns_tophat
 	{
@@ -62,7 +63,6 @@ struct cbc_accel
 	float x_knaught[3];
 	long timeout;
 }acceleramator;
-float ticksPerMM = -1;
 void build_left_wheel(int port, long ticks_cycle, float speed_proportion, float wheel_diameter, float radial_distance)
 {
 	left.wheel.port = port;
@@ -70,6 +70,7 @@ void build_left_wheel(int port, long ticks_cycle, float speed_proportion, float 
 	left.wheel.speed_proportion = speed_proportion;
 	left.wheel.wheel_diameter = wheel_diameter;
 	left.wheel.radial_distance = radial_distance;
+	left.wheel.ticks_per_mm = (float)ticks_cycle/(wheel_diameter*PI);
 }
 void build_right_wheel(int port, long ticks_cycle, float speed_proportion, float wheel_diameter, float radial_distance)
 {
@@ -78,6 +79,7 @@ void build_right_wheel(int port, long ticks_cycle, float speed_proportion, float
 	right.wheel.speed_proportion = speed_proportion;
 	right.wheel.wheel_diameter = wheel_diameter;
 	right.wheel.radial_distance = radial_distance;
+	right.wheel.ticks_per_mm = (float)ticks_cycle/(wheel_diameter*PI);
 }
 void build_left_tophat(int port, int white, int black, int error, long timeout)
 {
@@ -109,14 +111,10 @@ void build_right_touch(int port, long timeout)
 }
 void cbc_wait(int distance)
 {
-	if(left.wheel.last_requested_speed != 0 && distance != 0)
-	{
-		if(ticksPerMM == -1){
-			ticksPerMM = (float)left.wheel.ticks_cycle/(left.wheel.wheel_diameter*PI);
-		}
-		
+	if(left.wheel.last_requested_speed != 0 && distance != 0 && left.wheel.ticks_per_mm != 0)
+	{		
 		//use a timer for the left wheel so we don't use bmd() . It is slow and inconsistent
-		int time = (int)fabs((1000.0*distance*ticksPerMM)/left.wheel.last_requested_speed);
+		int time = (int)fabs((1000.0*distance*left.wheel.ticks_per_mm)/left.wheel.last_requested_speed);
 		msleep(time);
 	}
 }
