@@ -62,6 +62,7 @@ struct cbc_accel
 	float x_knaught[3];
 	long timeout;
 }acceleramator;
+float ticksPerMM = -1;
 void build_left_wheel(int port, long ticks_cycle, float speed_proportion, float wheel_diameter, float radial_distance)
 {
 	left.wheel.port = port;
@@ -110,13 +111,28 @@ void cbc_wait(int distance)
 {
 	if(left.wheel.last_requested_speed != 0 && distance != 0)
 	{
+		if(ticksPerMM == -1){
+			ticksPerMM = (float)left.wheel.ticks_cycle/(left.wheel.wheel_diameter*PI);
+		}
+		
 		//use a timer for the left wheel so we don't use bmd() . It is slow and inconsistent
-		int time = (int)(1000.0*(fabs((float)distance/((((float)left.wheel.last_requested_speed)*(float)left.wheel.wheel_diameter * PI)/(float)left.wheel.ticks_cycle))));
+		int time = (int)fabs((1000.0*distance*ticksPerMM)/left.wheel.last_requested_speed);
 		msleep(time);
 	}
 }
 void cbc_halt()
 {
+	// freeze wheels for active stop (cutting power ist inaccurate)
+	set_auto_publish(0); // won't send every command one by one to kmod
+	publish(); // send every enqueued package to kmod
+	freeze(left.wheel.port);
+	freeze(right.wheel.port);
+	set_auto_publish(1); // send every command one by one to kmod
+	publish(); // send enqueued driving commands at once to kmod
+	
+	msleep(100); // wait for bot to stop 
+	
+	// cut motor's power (for saving battery and fitting the rules)
 	set_auto_publish(0); // won't send every command one by one to kmod
 	publish(); // send every enqueued package to kmod
 	off(left.wheel.port);
@@ -131,10 +147,14 @@ int cbc_direct(int lspeed, int rspeed)
 	if(lspeed!=0)
 	{
 		mav(left.wheel.port, lspeed); // enqueue driving commands
+	}else{
+		freeze(left.wheel.port);
 	}
 	if(rspeed!=0)
 	{
 		mav(right.wheel.port, rspeed); // enqueue driving commands
+	}else{
+		freeze(right.wheel.port);
 	}
 	set_auto_publish(1); // send every command one by one to kmod
 	publish(); // send enqueued driving commands at once to kmod
