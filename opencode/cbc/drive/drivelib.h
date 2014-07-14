@@ -167,7 +167,7 @@ int cbc_straight(int speed, float distance)
 	float lspeed = (float)speed * left.wheel.speed_proportion;
 	float rspeed = (float)speed * right.wheel.speed_proportion;
 
-	if(rspeed > 1000 || lspeed > 1000 || rspeed < -1000 || lspeed < -1000)
+	if(rspeed > 1500 || lspeed > 1500 || rspeed < -1500 || lspeed < -1500)
 	{
 		printf("\nWarning! Invalid CBC Speed\n");
 		return -1;
@@ -196,7 +196,7 @@ int cbc_arc(int speed, float radius, float theta) // 0 <--> 1000 (unitless), + |
 	float lspeed = (float)speed * left.wheel.speed_proportion * ldistance / arc_length;
 	float rspeed = (float)speed * right.wheel.speed_proportion * rdistance / arc_length;
 
-	if(rspeed > 1000 || lspeed > 1000 || rspeed < -1000 || lspeed < -1000)
+	if(rspeed > 1500 || lspeed > 1500 || rspeed < -1500 || lspeed < -1500)
 	{
 		printf("\nWarning! Invalid CBC Speed\n");
 		return -1;
@@ -225,7 +225,7 @@ int cbc_spin(int speed, float theta)
 	float lspeed = (float)speed * left.wheel.speed_proportion * left.wheel.radial_distance / (left.wheel.radial_distance + left.wheel.radial_distance);
 	float rspeed = (float)speed * right.wheel.speed_proportion * right.wheel.radial_distance / (right.wheel.radial_distance + right.wheel.radial_distance);
 
-	if(rspeed > 1000 || lspeed > 1000 || rspeed < -1000 || lspeed < -1000)
+	if(rspeed > 1500 || lspeed > 1500 || rspeed < -1500 || lspeed < -1500)
 	{
 		printf("\nWarning! Invalid CBC Speed\n");
 		return -1;
