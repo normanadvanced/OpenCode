@@ -109,14 +109,22 @@ void build_right_touch(int port, long timeout)
 	right.touch.port = port;
 	right.touch.timeout = timeout;
 }
-void cbc_wait(int distance)
+
+int cbc_calc_wait(int distance)
 {
 	if(left.wheel.last_requested_speed != 0 && distance != 0 && left.wheel.ticks_per_mm != 0)
-	{		
-		//use a timer for the left wheel so we don't use bmd() . It is slow and inconsistent
-		int time = (int)fabs((1000.0*distance*left.wheel.ticks_per_mm)/left.wheel.last_requested_speed);
-		msleep(time);
+	{
+		return (int)fabs((1000.0*(float)distance*left.wheel.ticks_per_mm)/(float)left.wheel.last_requested_speed);
 	}
+	else
+	{
+		return 0;
+	}
+}
+void cbc_wait(int distance)
+{
+	//use a timer for the left wheel so we don't use bmd() . It is slow and inconsistent
+	msleep( cbc_calc_wait(distance) );
 }
 void cbc_halt()
 {
