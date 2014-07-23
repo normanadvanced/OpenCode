@@ -2,6 +2,7 @@
 #define __DRIVELIB_H__
 
 #include <stdio.h>
+#include <math.h>
 
 #include "/usr/include/kovan/kovan.h"
 #include "../sensor/sensorlib.h"
@@ -182,14 +183,7 @@ int cbc_straight(int speed, float distance)
 	}
 	else
 	{
-		if(distance>0.0)
-		{
-			cbc_direct(lspeed, rspeed);
-		}
-		else if(distance<0.0)
-		{
-			cbc_direct(-lspeed, -rspeed);
-		}
+		cbc_direct(copysignf(lspeed, distance), copysignf(rspeed, distance));
 		cbc_wait(distance);
 		return 1;
 	}
@@ -211,15 +205,7 @@ int cbc_arc(int speed, float radius, float theta) // 0 <--> 1000 (unitless), + |
 	}
 	else
 	{
-		if(rdistance>0.0)
-		{
-			cbc_direct(-lspeed, rspeed);
-		}
-		else if(rdistance<0.0)
-		{
-			cbc_direct(lspeed, -rspeed);
-		}
-		cbc_direct(lspeed, rspeed);
+		cbc_direct(copysignf(lspeed, ldistance), copysignf(rspeed, rdistance));
 		cbc_wait(ldistance);
 		return 1;
 	}
@@ -240,14 +226,7 @@ int cbc_spin(int speed, float theta)
 	}
 	else
 	{
-		if(theta>0.0)
-		{
-			cbc_direct(-lspeed, rspeed);
-		}
-		else if(theta<0.0)
-		{
-			cbc_direct(lspeed, -rspeed);
-		}
+		cbc_direct(-1*copysignf(lspeed, theta), copysignf(rspeed, theta));
 		cbc_wait(ldistance);
 		return 1;
 	}
